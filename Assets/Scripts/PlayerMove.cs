@@ -10,12 +10,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField][Range(0f, 1f)] private float verticalDamping = 0.8f;
     private Transform sprite;
 
+    private PlayerState state;
     private Rigidbody2D rb;
     private InputManager input;
     private Animator anim;
 
     private void Awake()
     {
+        state = GetComponent<PlayerState>();
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         input = GetComponent<InputManager>();
@@ -41,6 +43,8 @@ public class PlayerMovement : MonoBehaviour
         Vector2 moveDir = moveInput.normalized;
 
         rb.linearVelocity = moveDir * currentSpeed;
+
+        state.PrevDir = moveDir;
 
         float animVal = moveInput.magnitude < 0.1f ? 0f : (input.IsSprinting ? 1f : 0.5f);
         anim.SetFloat("move", animVal);
