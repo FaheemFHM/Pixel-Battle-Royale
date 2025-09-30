@@ -27,20 +27,21 @@ public class GunManager : MonoBehaviour
     private Vector2 aimDir = Vector2.right;
     private Vector2 startPos;
     private float currentAngle = 0f;
-
+    private CrosshairManager crosshairManager;
     private float fireCooldown = 0f;
 
     private void Awake()
     {
         // components
         input = GetComponent<InputManager>();
+        crosshairManager = GetComponent<CrosshairManager>();
 
         // variables
         startPos = pivot.localPosition;
         firePoint = gunSprite.GetChild(0);
 
-        // recoil
-        recoilDur = recoilDuration < data.fireRate ? recoilDuration : data.fireRate * 0.8f;
+        // other
+        SwitchGun(data);
     }
 
     private void Update()
@@ -69,6 +70,13 @@ public class GunManager : MonoBehaviour
         // --- Flip gun if aiming left ---
         if (aimDir.x < 0) gunSprite.localScale = new Vector3(1f, -1f, 1f);
         else gunSprite.localScale = Vector3.one;
+    }
+
+    void SwitchGun(GunSO newData)
+    {
+        data = newData;
+        recoilDur = recoilDuration < data.fireRate ? recoilDuration : data.fireRate * 0.8f;
+        crosshairManager.SetCrosshair(data);
     }
 
     void TryShooting()

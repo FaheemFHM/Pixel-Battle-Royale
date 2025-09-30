@@ -17,5 +17,5 @@ MonoBehaviour:
   bulletSpeed: 10
   bulletDamage: 1
   useCustomCrosshair: 0
-  crosshairSprite: {fileID: 0}
-  crosshairScale: 0.1
+  crosshairSprite: {fileID: 21300000, guid: 9f0ba308ff7be724fb9dd045a52f8dfb, type: 3}
+  crosshairScale: 0.5
