@@ -6,4 +6,5 @@ public class PlayerState : MonoBehaviour
     public int TeamId { get; set; } = 0;
     public int Health { get; set; } = 100;
     public Vector2 PrevDir { get; set; } = Vector2.right;
+    public bool OnRamp { get; set; } = false;
 }
