@@ -29,12 +29,14 @@ public class GunManager : MonoBehaviour
     private float currentAngle = 0f;
     private CrosshairManager crosshairManager;
     private float fireCooldown = 0f;
+    private StatsManager stats;
 
     private void Awake()
     {
         // components
         input = GetComponent<InputManager>();
         crosshairManager = GetComponent<CrosshairManager>();
+        stats = GetComponent<StatsManager>();
 
         // variables
         startPos = pivot.localPosition;
@@ -81,8 +83,11 @@ public class GunManager : MonoBehaviour
 
     void TryShooting()
     {
-        if (fireCooldown > 0f) fireCooldown -= Time.deltaTime;
-        else if (input.IsPrimary) Shoot();
+        fireCooldown = Mathf.Max(0, fireCooldown - Time.deltaTime);
+        if (!input.IsPrimary) return;
+        if (fireCooldown > 0f) return;
+        if (stats.OnRamp) return;
+        Shoot();
     }
 
     private void Shoot()

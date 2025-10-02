@@ -8,7 +8,7 @@ public class Ramps : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         // if there isnt a player move component, return
-        var s = other.GetComponent<PlayerState>();
+        var s = other.GetComponent<StatsManager>();
         if (s == null) return;
 
         // set ramp damping
@@ -18,7 +18,7 @@ public class Ramps : MonoBehaviour
     private void OnTriggerExit2D(Collider2D other)
     {
         // get player state component
-        var s = other.GetComponent<PlayerState>();
+        var s = other.GetComponent<StatsManager>();
         if (s == null) return;
 
         // get last input direction

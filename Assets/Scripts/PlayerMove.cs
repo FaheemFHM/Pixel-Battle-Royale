@@ -1,6 +1,5 @@
 using UnityEngine;
 
-[RequireComponent(typeof(PlayerState))]
 [RequireComponent(typeof(StatsManager))]
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(InputManager))]
@@ -14,7 +13,6 @@ public class PlayerMovement : MonoBehaviour
 
     private Transform sprite;
 
-    private PlayerState state;
     private StatsManager stats;
     private Rigidbody2D rb;
     private InputManager input;
@@ -22,7 +20,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void Awake()
     {
-        state = GetComponent<PlayerState>();
         stats = GetComponent<StatsManager>();
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
@@ -44,25 +41,28 @@ public class PlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         // handle sprinting
-        float currentSpeed = (input.IsSprinting && !stats.sprintConsumed) ? sprintSpeed : moveSpeed;
+        bool isSprinting = input.IsSprinting && !stats.sprintConsumed;
+        float currentSpeed = isSprinting ? sprintSpeed : moveSpeed;
 
         // vertical damping
-        float verticalDamping = state.OnRamp ? verticalDampingRamp : verticalDampingDefault;
+        float verticalDamping = stats.OnRamp ? verticalDampingRamp : verticalDampingDefault;
 
         // set movement vectors
         Vector2 moveInput = input.Move.normalized;
+        Vector2 aimInput = input.Look.normalized;
         Vector2 moveDir = new Vector2(moveInput.x, moveInput.y * verticalDamping);
 
         // apply movement
         rb.linearVelocity = moveDir * currentSpeed;
-        state.PrevDir = moveDir;
+        stats.PrevDir = moveDir;
 
         // animations
-        float animVal = moveInput.magnitude < 0.1f ? 0f : (input.IsSprinting ? 1f : 0.5f);
+        float animVal = moveInput.magnitude < 0.1f ? 0f : (isSprinting ? 1f : 0.5f);
         anim.SetFloat("move", animVal);
 
         // turning
         if (moveInput.x != 0f) sprite.localScale = new Vector3(moveInput.x < 0f ? -1 : 1, 1, 1);
+        else if (aimInput.x != 0f) sprite.localScale = new Vector3(aimInput.x < 0f ? -1 : 1, 1, 1);
     }
 
     void ToggleSprint(bool isPressing)
