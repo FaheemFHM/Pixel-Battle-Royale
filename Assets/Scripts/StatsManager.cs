@@ -98,23 +98,31 @@ public class StatsManager : MonoBehaviour
     }
     public Vector2 PrevDir { get; set; } = Vector2.right;
 
-    private void Start()
+    private void Awake()
     {
         ghost = GetComponent<PlayerGhost>();
+    }
 
+    private void Start()
+    {
+        // health
         health = maxHealth;
         uiWorld = transform.root.GetComponentInChildren<UIWorld>();
         uiWorld.SetMaxHealth(maxHealth);
         uiWorld.SetHealth(health);
 
+        // stamina
         stamina = staminaMax;
         ui = FindFirstObjectByType<UI>();
         ui.SetStamina(1f);
 
+        // stats
         Kills = 0;
         Deaths = 0;
         ShotsHit = 0;
         ShotsMissed = 0;
+
+        // elevation
         Level = 0;
         OnRamp = false;
     }

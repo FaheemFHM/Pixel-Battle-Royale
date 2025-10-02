@@ -50,6 +50,9 @@ TagManager:
   - name: Level 2
     uniqueID: 1326854357
     locked: 0
+  - name: Destructables
+    uniqueID: 3066344143
+    locked: 0
   - name: Player
     uniqueID: 1740505363
     locked: 0

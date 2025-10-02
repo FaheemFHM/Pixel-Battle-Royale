@@ -84,9 +84,11 @@ public class GunManager : MonoBehaviour
     void TryShooting()
     {
         fireCooldown = Mathf.Max(0, fireCooldown - Time.deltaTime);
+
         if (!input.IsPrimary) return;
         if (fireCooldown > 0f) return;
         if (stats.OnRamp) return;
+
         Shoot();
     }
 
