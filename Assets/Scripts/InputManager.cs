@@ -24,6 +24,7 @@ public class InputManager : MonoBehaviour
     public event Action<bool> OnSprint;
     public event Action<bool> OnPrimary;
     public event Action<bool> OnSecondary;
+    public event Action OnSwitch;
 
     private void Awake()
     {
@@ -109,6 +110,12 @@ public class InputManager : MonoBehaviour
         {
             IsSecondary = false;
             OnSecondary?.Invoke(false);
+        };
+
+        // scroll
+        controls.Player.Switch.started += ctx =>
+        {
+            OnSwitch?.Invoke();
         };
     }
 

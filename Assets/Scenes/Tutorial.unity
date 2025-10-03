@@ -1222,8 +1222,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   sprintSpeed: 5
-  verticalDampingDefault: 0.85
-  verticalDampingRamp: 0.65
+  verticalDampingDefault: 0.8
+  verticalDampingRamp: 0.6
 --- !u!114 &243860218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1329,13 +1329,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pivot: {fileID: 197831979}
-  gunSprite: {fileID: 146004963}
+  gunSpriteObj: {fileID: 146004963}
   orbitSpeed: 180
   orbitDistance: 0.25
   isClockwise: 1
   bulletPrefab: {fileID: 3047260685011868556, guid: 0097c5dfa2c48754786616f51d7dfa2c, type: 3}
   bulletFolder: {fileID: 1571551669}
-  data: {fileID: 11400000, guid: c8d10baef6634c6418b858c28fcda8a9, type: 2}
+  dataPrimary: {fileID: 11400000, guid: de5c1ef24ad736c45ba20f6da0d6c927, type: 2}
+  dataSecondary: {fileID: 11400000, guid: c8d10baef6634c6418b858c28fcda8a9, type: 2}
   recoilDuration: 0.05
   recoilDistance: 0.1
 --- !u!114 &243860224
@@ -1351,6 +1352,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
+  healthRegenDelay: 3
+  healthRegenRate: 10
   stamina: 0
   staminaMax: 100
   staminaDepletionSprint: 40
