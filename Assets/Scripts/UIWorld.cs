@@ -7,9 +7,10 @@ public class UIWorld : MonoBehaviour
     [SerializeField] private Slider healthBar;
     private int maxHealth;
 
-    public void SetMaxHealth(int max)
+    public void SetMaxHealth(int val)
     {
-        healthBar.maxValue = max;
+        healthBar.maxValue = val;
+        maxHealth = val;
     }
 
     public void SetHealth(int val)

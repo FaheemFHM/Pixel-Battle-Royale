@@ -7,8 +7,23 @@ public class StatsManager : MonoBehaviour
     private PlayerGhost ghost;
 
     [Header("Health")]
-    public int health;
     public int maxHealth = 100;
+    public float healthRegenDelay = 3f;
+    public float healthRegenRate = 10f;
+    private float healthRegenTimer;
+    private float healthRegenTimerStep;
+    private int health = 0;
+    public int Health
+    {
+        get => health;
+        private set
+        {
+            int clamped = Mathf.Clamp(value, 0, maxHealth);
+            if (clamped == health) return;
+            health = clamped;
+            uiWorld.SetHealth(health);
+        }
+    }
 
     [Header("Stamina")]
     public float stamina;
@@ -18,7 +33,7 @@ public class StatsManager : MonoBehaviour
     public float staminaRegenRate = 15f;
     public bool isSprinting;
     public bool sprintConsumed;
-    private float regenTimer;
+    private float staminaRegenTimer;
 
     [Header("Performance")]
     private int kills = 0;
@@ -101,19 +116,18 @@ public class StatsManager : MonoBehaviour
     private void Awake()
     {
         ghost = GetComponent<PlayerGhost>();
+        uiWorld = transform.root.GetComponentInChildren<UIWorld>();
+        ui = FindFirstObjectByType<UI>();
     }
 
     private void Start()
     {
         // health
-        health = maxHealth;
-        uiWorld = transform.root.GetComponentInChildren<UIWorld>();
         uiWorld.SetMaxHealth(maxHealth);
-        uiWorld.SetHealth(health);
+        Health = maxHealth;
 
         // stamina
         stamina = staminaMax;
-        ui = FindFirstObjectByType<UI>();
         ui.SetStamina(1f);
 
         // stats
@@ -129,13 +143,31 @@ public class StatsManager : MonoBehaviour
 
     private void Update()
     {
-        // stamina management
+        HandleHealthRegen();
+        DepleteStamina();
+    }
+
+    public void EditHealth(int amount) => Health += amount;
+
+    private void HandleHealthRegen()
+    {
+        if (healthRegenDelay > 0f) healthRegenDelay -= Time.deltaTime;
+        else if (healthRegenTimerStep > 0f) healthRegenTimerStep -= Time.deltaTime;
+        else if (Health < maxHealth)
+        {
+            Health++;
+            healthRegenTimerStep = 1f / healthRegenRate;
+        }
+    }
+
+    void DepleteStamina()
+    {
         if (isSprinting && !sprintConsumed)
         {
             // drain stamina
             stamina -= staminaDepletionSprint * Time.deltaTime;
 
-            regenTimer = staminaRegenDelay;
+            staminaRegenTimer = staminaRegenDelay;
 
             // if depleted
             if (stamina < 0f)
@@ -144,10 +176,10 @@ public class StatsManager : MonoBehaviour
                 sprintConsumed = true;
             }
         }
-        else if (regenTimer > 0f)
+        else if (staminaRegenTimer > 0f)
         {
             // wait for recharge delay
-            regenTimer -= Time.deltaTime;
+            staminaRegenTimer -= Time.deltaTime;
         }
         else
         {

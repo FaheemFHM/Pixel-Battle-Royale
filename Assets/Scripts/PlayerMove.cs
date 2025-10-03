@@ -69,5 +69,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isPressing) stats.sprintConsumed = false;
         stats.isSprinting = isPressing;
+        stats.EditHealth(-15);
     }
 }
