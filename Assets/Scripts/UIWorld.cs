@@ -7,6 +7,11 @@ public class UIWorld : MonoBehaviour
     [SerializeField] private Slider healthBar;
     private int maxHealth;
 
+    private void OnDisable()
+    {
+        healthBar.gameObject.SetActive(false);
+    }
+
     public void SetMaxHealth(int val)
     {
         healthBar.maxValue = val;

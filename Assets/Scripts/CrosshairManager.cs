@@ -17,6 +17,16 @@ public class CrosshairManager : MonoBehaviour
         input = GetComponent<InputManager>();
     }
 
+    private void OnEnable()
+    {
+        crosshair.gameObject.SetActive(true);
+    }
+
+    private void OnDisable()
+    {
+        crosshair.gameObject.SetActive(false);
+    }
+
     private void LateUpdate()
     {
         bool useAim = input.Look.sqrMagnitude > 0.01f;

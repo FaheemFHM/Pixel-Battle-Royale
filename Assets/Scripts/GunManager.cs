@@ -51,6 +51,16 @@ public class GunManager : MonoBehaviour
         TryShooting();
     }
 
+    private void OnEnable()
+    {
+        gunSprite.gameObject.SetActive(true);
+    }
+
+    private void OnDisable()
+    {
+        gunSprite.gameObject.SetActive(false);
+    }
+
     private void LateUpdate()
     {
         if (input == null) return;

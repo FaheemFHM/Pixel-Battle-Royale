@@ -112,6 +112,7 @@ public class StatsManager : MonoBehaviour
         }
     }
     public Vector2 PrevDir { get; set; } = Vector2.right;
+    private bool isDead;
 
     private void Awake()
     {
@@ -143,11 +144,16 @@ public class StatsManager : MonoBehaviour
 
     private void Update()
     {
+        if (isDead) return;
         HandleHealthRegen();
         DepleteStamina();
     }
 
-    public void EditHealth(int amount) => Health += amount;
+    public void EditHealth(int amount)
+    {
+        Health += amount;
+        if (Health < 1) Die();
+    }
 
     private void HandleHealthRegen()
     {
@@ -189,5 +195,15 @@ public class StatsManager : MonoBehaviour
         }
 
         ui.SetStamina(stamina / staminaMax);
+    }
+
+    void Die()
+    {
+        ui.enabled = false;
+        uiWorld.enabled = false;
+        GetComponent<PlayerMove>().Die();
+        Deaths++;
+        isDead = true;
+
     }
 }

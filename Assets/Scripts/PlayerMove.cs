@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(InputManager))]
 [RequireComponent(typeof(Animator))]
-public class PlayerMovement : MonoBehaviour
+public class PlayerMove : MonoBehaviour
 {
     [SerializeField][Range(1f, 10f)] private float moveSpeed = 3f;
     [SerializeField][Range(1f, 10f)] private float sprintSpeed = 5f;
@@ -70,5 +70,16 @@ public class PlayerMovement : MonoBehaviour
         if (!isPressing) stats.sprintConsumed = false;
         stats.isSprinting = isPressing;
         stats.EditHealth(-15);
+    }
+
+    public void Die()
+    {
+        anim.SetTrigger("die");
+
+        rb.linearVelocity = Vector2.zero;
+
+        GetComponentInChildren<GunManager>().enabled = false;
+        GetComponentInChildren<CrosshairManager>().enabled = false;
+        this.enabled = false;
     }
 }

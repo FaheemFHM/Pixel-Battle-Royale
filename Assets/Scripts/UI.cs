@@ -11,6 +11,16 @@ public class UI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI statAccuracy;
     [SerializeField] private TextMeshProUGUI statLevel;
 
+    private void OnEnable()
+    {
+        //
+    }
+
+    private void OnDisable()
+    {
+        staminaBar.gameObject.SetActive(false);
+    }
+
     public void SetStamina(float val)
     {
         staminaBar.SetValue(val);
