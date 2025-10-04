@@ -26,7 +26,6 @@ public class InputManager : MonoBehaviour
     public event Action<bool> OnPrimary;
     public event Action<bool> OnSecondary;
     public event Action<bool> OnEmote;
-    public event Action OnSwitch;
     public event Action OnBack;
 
     private void Awake()
@@ -126,12 +125,6 @@ public class InputManager : MonoBehaviour
         {
             IsEmoting = false;
             OnEmote?.Invoke(false);
-        };
-
-        // scroll
-        controls.Player.Switch.started += ctx =>
-        {
-            OnSwitch?.Invoke();
         };
 
         // back

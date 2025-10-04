@@ -15,31 +15,27 @@ public class GunManager : MonoBehaviour
     [Header("Gun")]
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform bulletFolder;
-    [SerializeField] private GunSO dataPrimary;
-    [SerializeField] private GunSO dataSecondary;
-    public bool allowGunSwitching = false;
-    private bool isPrimaryGun;
-    private GunSO data;
+    [SerializeField] private GunSO data;
 
     [Header("Recoil")]
     [SerializeField][Range(0.01f, 0.1f)] private float recoilDuration = 0.05f;
     [SerializeField][Range(0.01f, 0.25f)] private float recoilDistance = 0.1f;
-    private Vector3 recoilPosStart;
-    private Vector3 recoilPos;
-    private float recoilDur;
 
+    private Vector2 aimDir = Vector2.right;
+    private float currentAngle = 0f;
     private SpriteRenderer gunSpriteRend;
     private InputManager input;
-    private Vector2 aimDir = Vector2.right;
-    private Vector2 startPos;
-    private float currentAngle = 0f;
     private CrosshairManager crosshairManager;
-    private float fireCooldown = 0f;
     private StatsManager stats;
+
+    // Shooting state
+    private bool isFiring;
+    private bool ammoConsumed;
+    private float nextFire;
 
     private void Awake()
     {
-        // components
+        // Components
         input = GetComponent<InputManager>();
         crosshairManager = GetComponent<CrosshairManager>();
         stats = GetComponent<StatsManager>();
@@ -49,38 +45,34 @@ public class GunManager : MonoBehaviour
         firePoint = gunSprite.GetChild(0);
         gunSpriteRend = gunSprite.GetComponent<SpriteRenderer>();
 
-        // variables
-        startPos = gunPivot.position;
-
-        // other
-        isPrimaryGun = true;
-        SwitchGun(dataPrimary);
-    }
-
-    private void Update()
-    {
-        TryShooting();
+        // Setup
+        SwitchGun(data);
     }
 
     private void OnEnable()
     {
-        input.OnSwitch += TrySwitchGun;
-
         gunSprite.gameObject.SetActive(true);
     }
 
     private void OnDisable()
     {
-        input.OnSwitch -= TrySwitchGun;
-
         gunSprite.gameObject.SetActive(false);
+    }
+
+    private void Update()
+    {
+        TryShooting();
+        
+        if (!input.IsPrimary) ammoConsumed = false;
     }
 
     private void LateUpdate()
     {
         // --- Update Aim Direction ---
-        if (input.Look.sqrMagnitude > 0.01f) aimDir = input.Look.normalized;
-        else if (input.Move.sqrMagnitude > 0.01f) aimDir = input.Move.normalized;
+        if (input.Look.sqrMagnitude > 0.01f)
+            aimDir = input.Look.normalized;
+        else if (input.Move.sqrMagnitude > 0.01f)
+            aimDir = input.Move.normalized;
 
         // --- Orbit the gun around pivot ---
         currentAngle += (isClockwise ? -1 : 1) * orbitSpeed * Time.deltaTime;
@@ -96,63 +88,102 @@ public class GunManager : MonoBehaviour
         gunSprite.localScale = aimDir.x < 0 ? new Vector3(1f, -1f, 1f) : Vector3.one;
     }
 
-    void TrySwitchGun()
-    {
-        if (!allowGunSwitching) return;
-        isPrimaryGun = !isPrimaryGun;
-        SwitchGun(isPrimaryGun ? dataPrimary : dataSecondary);
-    }
-
     void SwitchGun(GunSO newData)
     {
         data = newData;
         gunSpriteRend.sprite = data.sprite;
-        recoilDur = recoilDuration < data.fireRate ? recoilDuration : data.fireRate * 0.8f;
         crosshairManager.SetCrosshair(data);
     }
 
     void TryShooting()
     {
-        fireCooldown = Mathf.Max(0, fireCooldown - Time.deltaTime);
-
+        // escape clauses
         if (!input.IsPrimary) return;
-        if (fireCooldown > 0f) return;
-        if (stats.OnRamp) return;
+        if (isFiring) return;
+        if (ammoConsumed) return;
+        if (Time.time < nextFire) return;
+        if (stats != null && stats.OnRamp) return;
 
-        Shoot();
+        StartCoroutine(Shoot());
     }
 
-    private void Shoot()
+    IEnumerator Shoot()
     {
-        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity, bulletFolder);
+        isFiring = true;
 
+        // semi-auto: consume one shot per click
+        if (!data.isAuto)
+            ammoConsumed = true;
+
+        int burstCount = data.isBurst ? data.burstCount : 1;
+
+        for (int i = 0; i < burstCount; i++)
+        {
+            // --- Recoil ---
+            StartCoroutine(Recoil());
+
+            // --- Fire Type ---
+            if (data.isShotgun)
+                FireShotgun();
+            else
+                FireBullet();
+
+            // --- Burst Delay ---
+            if (data.isBurst)
+                yield return new WaitForSeconds(data.burstRate);
+        }
+
+        // --- Cooldown before next shot ---
+        nextFire = Time.time + data.fireRate;
+
+        isFiring = false;
+    }
+
+    void FireBullet()
+    {
+        if (!bulletPrefab) return;
+
+        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity, bulletFolder);
         bullet.GetComponent<Rigidbody2D>().linearVelocity = aimDir * data.bulletSpeed;
 
         Destroy(bullet, 5f);
-        
-        fireCooldown = data.fireRate;
+    }
 
-        StartCoroutine(Recoil());
+    void FireShotgun()
+    {
+        if (!bulletPrefab) return;
+
+        for (int i = 0; i < data.spreadCount; i++)
+        {
+            float spread = Random.Range(-data.spreadAngle * 0.5f, data.spreadAngle * 0.5f);
+            Vector2 spreadDir = Quaternion.Euler(0, 0, spread) * aimDir;
+
+            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity, bulletFolder);
+            bullet.GetComponent<Rigidbody2D>().linearVelocity = spreadDir * data.bulletSpeed;
+
+            Destroy(bullet, 5f);
+        }
     }
 
     IEnumerator Recoil()
     {
         Vector3 start = gunSprite.localPosition;
         Vector3 target = start - gunSprite.right * recoilDistance;
+        float dur = Mathf.Min(recoilDuration, data.fireRate * 0.8f);
 
         float t = 0f;
-        while (t < recoilDur)
+        while (t < dur)
         {
             t += Time.deltaTime;
-            gunSprite.localPosition = Vector3.Lerp(start, target, t / recoilDur);
+            gunSprite.localPosition = Vector3.Lerp(start, target, t / dur);
             yield return null;
         }
 
         t = 0f;
-        while (t < recoilDur)
+        while (t < dur)
         {
             t += Time.deltaTime;
-            gunSprite.localPosition = Vector3.Lerp(target, start, t / recoilDur);
+            gunSprite.localPosition = Vector3.Lerp(target, start, t / dur);
             yield return null;
         }
 
