@@ -63,8 +63,7 @@ public class RadialMenus : MonoBehaviour
             emoteMenu.gameObject.SetActive(false);
 
             Sprite selected = emoteMenu.GetSprite();
-            if (selected != null)
-                emoteManager.ShowEmote(selected);
+            if (selected != null) emoteManager.ShowEmote(selected);
         }
     }
 

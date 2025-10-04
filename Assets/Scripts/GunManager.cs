@@ -17,6 +17,7 @@ public class GunManager : MonoBehaviour
     [SerializeField] private Transform bulletFolder;
     [SerializeField] private GunSO dataPrimary;
     [SerializeField] private GunSO dataSecondary;
+    public bool allowGunSwitching = false;
     private bool isPrimaryGun;
     private GunSO data;
 
@@ -97,6 +98,7 @@ public class GunManager : MonoBehaviour
 
     void TrySwitchGun()
     {
+        if (!allowGunSwitching) return;
         isPrimaryGun = !isPrimaryGun;
         SwitchGun(isPrimaryGun ? dataPrimary : dataSecondary);
     }

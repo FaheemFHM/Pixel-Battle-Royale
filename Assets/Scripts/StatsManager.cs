@@ -129,7 +129,7 @@ public class StatsManager : MonoBehaviour
 
         // stamina
         stamina = staminaMax;
-        ui.SetStamina(1f);
+        uiWorld.SetStamina(1f);
 
         // stats
         Kills = 0;
@@ -195,7 +195,7 @@ public class StatsManager : MonoBehaviour
             stamina = Mathf.Clamp(stamina, 0, staminaMax);
         }
 
-        ui.SetStamina(stamina / staminaMax);
+        uiWorld.SetStamina(stamina / staminaMax);
     }
 
     void Die()
