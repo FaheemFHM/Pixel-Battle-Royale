@@ -151,13 +151,14 @@ public class StatsManager : MonoBehaviour
 
     public void EditHealth(int amount)
     {
+        if (amount < 0) healthRegenTimer = healthRegenDelay;
         Health += amount;
         if (Health < 1) Die();
     }
 
     private void HandleHealthRegen()
     {
-        if (healthRegenDelay > 0f) healthRegenDelay -= Time.deltaTime;
+        if (healthRegenTimer > 0f) healthRegenTimer -= Time.deltaTime;
         else if (healthRegenTimerStep > 0f) healthRegenTimerStep -= Time.deltaTime;
         else if (Health < maxHealth)
         {

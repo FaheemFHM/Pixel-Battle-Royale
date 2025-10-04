@@ -4,11 +4,13 @@ using System.Collections;
 public class GunManager : MonoBehaviour
 {
     [Header("Orbit")]
-    [SerializeField] private Transform pivot;
-    [SerializeField] private Transform gunSpriteObj;
+    [SerializeField] private Transform gunPivot;
     [SerializeField][Range(0f, 720f)] private float orbitSpeed = 120f;
     [SerializeField][Range(0f, 1f)] private float orbitDistance = 0.35f;
     [SerializeField] private bool isClockwise = false;
+    private Transform gunOrbit;
+    private Transform gunSprite;
+    private Transform firePoint;
 
     [Header("Gun")]
     [SerializeField] private GameObject bulletPrefab;
@@ -25,8 +27,7 @@ public class GunManager : MonoBehaviour
     private Vector3 recoilPos;
     private float recoilDur;
 
-    private Transform firePoint;
-    private SpriteRenderer gunSprite;
+    private SpriteRenderer gunSpriteRend;
     private InputManager input;
     private Vector2 aimDir = Vector2.right;
     private Vector2 startPos;
@@ -41,11 +42,14 @@ public class GunManager : MonoBehaviour
         input = GetComponent<InputManager>();
         crosshairManager = GetComponent<CrosshairManager>();
         stats = GetComponent<StatsManager>();
-        gunSprite = gunSpriteObj.GetComponent<SpriteRenderer>();
+
+        gunOrbit = gunPivot.GetChild(0);
+        gunSprite = gunOrbit.GetChild(0);
+        firePoint = gunSprite.GetChild(0);
+        gunSpriteRend = gunSprite.GetComponent<SpriteRenderer>();
 
         // variables
-        startPos = pivot.localPosition;
-        firePoint = gunSpriteObj.GetChild(0);
+        startPos = gunPivot.position;
 
         // other
         isPrimaryGun = true;
@@ -61,20 +65,18 @@ public class GunManager : MonoBehaviour
     {
         input.OnSwitch += TrySwitchGun;
 
-        gunSpriteObj.gameObject.SetActive(true);
+        gunSprite.gameObject.SetActive(true);
     }
 
     private void OnDisable()
     {
         input.OnSwitch -= TrySwitchGun;
 
-        gunSpriteObj.gameObject.SetActive(false);
+        gunSprite.gameObject.SetActive(false);
     }
 
     private void LateUpdate()
     {
-        if (input == null) return;
-
         // --- Update Aim Direction ---
         if (input.Look.sqrMagnitude > 0.01f) aimDir = input.Look.normalized;
         else if (input.Move.sqrMagnitude > 0.01f) aimDir = input.Move.normalized;
@@ -83,15 +85,14 @@ public class GunManager : MonoBehaviour
         currentAngle += (isClockwise ? -1 : 1) * orbitSpeed * Time.deltaTime;
         float rad = currentAngle * Mathf.Deg2Rad;
         Vector2 offset = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * orbitDistance;
-        pivot.localPosition = startPos + offset;
+        gunOrbit.localPosition = offset;
 
         // --- Rotate the gun to aim ---
         float angle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
-        gunSpriteObj.rotation = Quaternion.Euler(0f, 0f, angle);
+        gunSprite.rotation = Quaternion.Euler(0f, 0f, angle);
 
         // --- Flip gun if aiming left ---
-        if (aimDir.x < 0) gunSpriteObj.localScale = new Vector3(1f, -1f, 1f);
-        else gunSpriteObj.localScale = Vector3.one;
+        gunSprite.localScale = aimDir.x < 0 ? new Vector3(1f, -1f, 1f) : Vector3.one;
     }
 
     void TrySwitchGun()
@@ -103,7 +104,7 @@ public class GunManager : MonoBehaviour
     void SwitchGun(GunSO newData)
     {
         data = newData;
-        gunSprite.sprite = data.sprite;
+        gunSpriteRend.sprite = data.sprite;
         recoilDur = recoilDuration < data.fireRate ? recoilDuration : data.fireRate * 0.8f;
         crosshairManager.SetCrosshair(data);
     }
@@ -134,14 +135,14 @@ public class GunManager : MonoBehaviour
 
     IEnumerator Recoil()
     {
-        recoilPosStart = gunSpriteObj.localPosition;
-        recoilPos = recoilPosStart - gunSpriteObj.right * recoilDistance;
+        Vector3 start = gunSprite.localPosition;
+        Vector3 target = start - gunSprite.right * recoilDistance;
 
         float t = 0f;
         while (t < recoilDur)
         {
             t += Time.deltaTime;
-            gunSpriteObj.localPosition = Vector3.Lerp(startPos, recoilPos, t / recoilDur);
+            gunSprite.localPosition = Vector3.Lerp(start, target, t / recoilDur);
             yield return null;
         }
 
@@ -149,10 +150,10 @@ public class GunManager : MonoBehaviour
         while (t < recoilDur)
         {
             t += Time.deltaTime;
-            gunSpriteObj.localPosition = Vector3.Lerp(recoilPos, startPos, t / recoilDur);
+            gunSprite.localPosition = Vector3.Lerp(target, start, t / recoilDur);
             yield return null;
         }
 
-        gunSpriteObj.localPosition = startPos;
+        gunSprite.localPosition = start;
     }
 }
