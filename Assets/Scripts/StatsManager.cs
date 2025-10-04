@@ -202,6 +202,7 @@ public class StatsManager : MonoBehaviour
     {
         ui.enabled = false;
         uiWorld.enabled = false;
+        transform.GetComponentInChildren<RadialMenus>().enabled = false;
         GetComponent<PlayerMove>().Die();
         Deaths++;
         isDead = true;

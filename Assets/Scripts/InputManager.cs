@@ -17,6 +17,7 @@ public class InputManager : MonoBehaviour
     public bool IsSprinting { get; private set; }
     public bool IsPrimary { get; private set; }
     public bool IsSecondary { get; private set; }
+    public bool IsEmoting { get; private set; }
 
     // events
     public event Action<bool> OnMove;
@@ -24,7 +25,9 @@ public class InputManager : MonoBehaviour
     public event Action<bool> OnSprint;
     public event Action<bool> OnPrimary;
     public event Action<bool> OnSecondary;
+    public event Action<bool> OnEmote;
     public event Action OnSwitch;
+    public event Action OnBack;
 
     private void Awake()
     {
@@ -112,10 +115,29 @@ public class InputManager : MonoBehaviour
             OnSecondary?.Invoke(false);
         };
 
+        // emote
+        controls.Player.Emote.started += ctx =>
+        {
+            IsEmoting = true;
+            OnEmote?.Invoke(true);
+        };
+
+        controls.Player.Emote.canceled += ctx =>
+        {
+            IsEmoting = false;
+            OnEmote?.Invoke(false);
+        };
+
         // scroll
         controls.Player.Switch.started += ctx =>
         {
             OnSwitch?.Invoke();
+        };
+
+        // back
+        controls.Player.Back.started += ctx =>
+        {
+            OnBack?.Invoke();
         };
     }
 
