@@ -6,7 +6,7 @@ public class RadialMenu : MonoBehaviour
     [SerializeField][Range(1, 12)] private int optionCount = 5;
     [SerializeField][Range(0f, 5f)] private float wheelRadius = 3f;
 
-/*    private void Start()
+    private void Start()
     {
         Setup();
     }
@@ -31,5 +31,5 @@ public class RadialMenu : MonoBehaviour
 
             Instantiate(optionPrefab, transform.position + pos, Quaternion.identity, transform);
         }
-    }*/
+    }
 }
